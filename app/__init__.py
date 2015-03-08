@@ -1,6 +1,3 @@
-#from pkgutil import extend_path
-#__path__ = extend_path(__path__, __name__)
-
 # Import flask and template operators
 from flask import Flask, render_template
 
@@ -17,16 +14,22 @@ app.config.from_object('config')
 # by modules and controllers
 db = SQLAlchemy(app)
 
-# Sample HTTP error handling
+# HTTP error handling
 @app.errorhandler(404)
 def not_found(error):
     return render_template('404.html'), 404
 
-# Import a module / component using its blueprint handler variable (mod_auth)
+# Import modules using blueprints
+from app.stream.controllers import stream_module
+#from app.list.controllers import list_module
+#from app.user.controllers import user_module
+#from app.tweet.controllers import tweet_module
 
-# Register blueprint(s)
-# app.register_blueprint(xyz_module)
-# ..
+# Register blueprints
+app.register_blueprint(stream_module)
+#app.register_blueprint(list_module)
+#app.register_blueprint(user_module)
+#app.register_blueprint(tweet_module)
 
 # Build the database:
 # This will create the database file using SQLAlchemy
