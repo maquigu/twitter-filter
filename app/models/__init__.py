@@ -41,17 +41,22 @@ class Stream(CommonColumns):
     __tablename__ = 'stream'
     name = Column(String(512))
 
-class List(CommonColumns):
-    __tablename__ = 'list'
+class StreamGroup(CommonColumns):
+    __tablename__ = 'stream_group'
+    stream_id = Column(Integer, ForeignKey('stream._id'), primary_key=True)
+    group_id = Column(Integer, ForeignKey('group._id'), primary_key=True)
+
+class Group(CommonColumns):
+    __tablename__ = 'group'
     slug = Column(String(1024))
     name = Column(String(512))
     tw_id = Column(String(512))
     owner = relationship(Owner, uselist=False)
-    
-class StreamList(CommonColumns):
-    __tablename__ = 'stream_list'
-    stream_id = Column(Integer, ForeignKey('stream._id'), primary_key=True)
-    list_id = Column(Integer, ForeignKey('list._id'), primary_key=True)
+
+class GroupUser(CommonColumns):
+    __tablename__ = 'group_user'
+    group_id = Column(Integer, ForeignKey('group._id'), primary_key=True)
+    user_id = Column(Integer, ForeignKey('user._id'), primary_key=True)
 
 class User(CommonColumns):
     __tablename__ = 'user'

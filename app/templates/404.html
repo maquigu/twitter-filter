@@ -1,4 +1,11 @@
-<link rel="stylesheet" href="{{url_for('static', filename='css/404.css')}}">
+{% extends "bootstrap/base.html" %}
+{% block title %}OPEN FILTER{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/404.css')}}">
+{% endblock %}
+
+{% block content %}
 <div class="wrapper row2">
   <div id="container" class="clear">
     <!-- ####################################################################################################### -->
@@ -11,7 +18,7 @@
         <h1><span><strong>4</strong></span><span><strong>0</strong></span><span><strong>4</strong></span></h1>
         <h2>Error ! <span>Page Not Found</span></h2>
       </div>
-      <p>For Some Reason The Page You Requested Could Not Be Found On Our Server</p>
+      <p>The Page You Requested Could Not Be Found.</p>
       <p><a href="javascript:history.go(-1)">&laquo; Go Back</a> / <a href="#">Go Home &raquo;</a></p>
       <!-- ####################################################################################################### -->
     </section>
@@ -21,3 +28,4 @@
     <!-- ####################################################################################################### -->
   </div>
 </div>
+{% endblock %}
