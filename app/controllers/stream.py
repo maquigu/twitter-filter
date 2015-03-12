@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 
 # Import models
-from app.models import Stream, StreamGroup
+from app.models import Stream, Lot, Owner
 
 # Import celery tasks
 from app import celery_tasks
@@ -19,26 +19,26 @@ def create():
     if isinstance(req, dict) and 'stream_name' in req:
         stream_name = req['stream_name']
         resp = {
-            'lists': [],
+            'lots': [],
             'stream_name': stream_name
         }
         stream_obj = Stream(name=stream_name)
         stream_lists = req.get('lists', [])
-        for list_dict in stream_lists:
-            if not isinstance(list_dict, dict):
+        for lot_dict in stream_lists:
+            if not isinstance(lot_dict, dict):
                 continue
-            list_obj = List(
-                slug=list_dict.get('slug'),
-                name=list_dict.get('name'),
-                tw_id=list_dict.get('twitter_id'),
-                owner=list_dict.get('owner')
+            lot_obj = Lot(
+                slug=lot_dict.get('slug'),
+                name=lot_dict.get('name'),
+                tw_id=lot_dict.get('twitter_id'),
+                owner=Owner(screen_name=lot_dict.get('owner'))
             )
-            resp['lists'].append(list_obj.dictify())
-            stream_list_obj = StreamList(stream=stream_obj, list=list_obj)
-            db.add(stream_list_obj)
-        db.commit()
+            resp['lots'].append(lot_obj.dictify())
+            stream_obj.lots.append(lot_obj)
+        db.session.add(stream_obj)
+        db.session.commit()
         resp['created'] = True
-        celery_tasks.on_create_stream(resp)
+        celery_tasks.on_create_stream(req)
         return  jsonify(response=resp, message='success')
     else:
         return jsonify(stream_name=None, message='stream_name required.')

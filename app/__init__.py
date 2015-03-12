@@ -17,20 +17,44 @@ Bootstrap(app)
 # Configurations
 app.config.from_object('config')
 
+# DB Models
+
+from app.models import (
+    CommonColumns,
+    Owner,
+    User,
+    LotUser,
+    Lot,
+    StreamLot,
+    Stream,
+    Hashtag,
+    TweetHashtag,
+    Mention,
+    TweetMention,
+    Share,
+    TweetShare,
+    Tweet,
+    Base
+)
 # route favicon
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-# Define the database object which is imported
-# by mods and controllers
-db = SQLAlchemy(app)
-
 # HTTP error handling
 @app.errorhandler(404)
 def not_found(error):
     return render_template('404.html'), 404
+
+# Define the database object which is imported
+# by mods and controllers
+db = SQLAlchemy(app)
+db.init_app(app)
+db.Model = Base
+# Build the database:
+# This will create the database file using SQLAlchemy
+db.create_all(app=app)
 
 # Import mods using blueprints
 from app.controllers.stream import stream_mod
@@ -43,7 +67,3 @@ app.register_blueprint(stream_mod)
 #app.register_blueprint(list_mod)
 #app.register_blueprint(user_mod)
 #app.register_blueprint(tweet_mod)
-
-# Build the database:
-# This will create the database file using SQLAlchemy
-db.create_all()

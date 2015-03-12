@@ -13,7 +13,7 @@ start(){
 }
 
 stop(){
-    pkill -9 -f celery
+    pkill -9 -f app.celery_tasks
     pkill -9 -f twitterBuffer.py 
 }
 

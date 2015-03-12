@@ -11,7 +11,7 @@ class TwitterBuffer(object):
         self.api_port=api_port
 
     def create_stream(self, stream_dict):
-        return self.perform_post('stream', stream_dict)
+        return self.perform_post('stream/', stream_dict)
 
     def perform_get(self, resource, params={}):
         response = None
