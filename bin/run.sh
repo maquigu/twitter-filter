@@ -8,12 +8,16 @@ if [ "$#" -lt "1" ]; then
 fi
 
 start(){
-    celery -A app.celery_tasks worker --loglevel=debug -n new &
+    # For buffer interaction with Twitter API
+    celery -A app.celery.buffer_tasks.celery worker -Q twitter_buffer --loglevel=debug -n twitter_buffer &
+    # Twitter Streaming API
+    celery -A app.celery.catcher_tasks.celery worker -Q twitter_catcher --loglevel=debug -n twitter_catcher &
     twitterBuffer.py &
 }
 
 stop(){
-    pkill -9 -f app.celery_tasks
+    pkill -9 -f twitter_buffer
+    pkill -9 -f twitter_catcher
     pkill -9 -f twitterBuffer.py 
 }
 
