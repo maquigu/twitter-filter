@@ -32,14 +32,17 @@ class CommonColumns(Base):
         attrs += [a.__name__ for a in inspect(self.__class__).all_orm_descriptors if a.extension_type is hybrid.HYBRID_PROPERTY]
         return dict([(c, getattr(self, c, None)) for c in attrs])
 
-class Owner(CommonColumns):
+class TWCommonColumns(CommonColumns):
+    __abstract__ = True
+    tw_id = Column(String(512))
+
+class Owner(TWCommonColumns):
     __tablename__ = 'owner'
     screen_name = Column(String(512))
 
-class User(CommonColumns):
+class User(TWCommonColumns):
     __tablename__ = 'user'
     screen_name = Column(String(512))
-    tw_id = Column(String(512))
     location = Column(String(512))
     json_str = Column(Text)    
 
@@ -49,11 +52,10 @@ class LotUser(CommonColumns):
     user_id = Column(Integer, ForeignKey('user._id'), primary_key=True)
     #user = relationship(User)
 
-class Lot(CommonColumns):
+class Lot(TWCommonColumns):
     __tablename__ = 'lot'
     slug = Column(String(1024))
     name = Column(String(512))
-    tw_id = Column(String(512))
     owner_id = Column(Integer, ForeignKey('owner._id'))
     owner = relationship(Owner, uselist=False)
     users = relationship(User, secondary='lot_user')
@@ -71,8 +73,7 @@ class Stream(CommonColumns):
 
 class Hashtag(CommonColumns):
     __tablename__ = 'hashtag'
-    hashtag = Column(String(1024))
-    timestamp = Column(DateTime)
+    text = Column(String(1024))
 
 class TweetHashtag(CommonColumns):
     __tablename__ = 'tweet_hashtag'
@@ -80,10 +81,21 @@ class TweetHashtag(CommonColumns):
     hashtag_id = Column(Integer, ForeignKey('hashtag._id'), primary_key=True)
     #hashtag = relationship(Hashtag)
 
-class Mention(CommonColumns):
+class Media(TWCommonColumns):
+    __tablename__ = 'media'
+    url = Column(String(2048))
+    display_url = Column(String(2048))
+    type = Column(String(512))
+
+class TweetMedia(CommonColumns):
+    __tablename__ = 'tweet_media'
+    tweet_id = Column(Integer, ForeignKey('tweet._id'), primary_key=True)
+    media_id = Column(Integer, ForeignKey('media._id'), primary_key=True)
+
+class Mention(TWCommonColumns):
     __tablename__ = 'mention'
-    mention = Column(String(512))
-    timestamp = Column(DateTime)
+    screen_name = Column(String(512))
+    name = Column(String(1024))
 
 class TweetMention(CommonColumns):
     __tablename__ = 'tweet_mention'
@@ -91,16 +103,17 @@ class TweetMention(CommonColumns):
     mention_id = Column(Integer, ForeignKey('mention._id'), primary_key=True)
     #mention = relationship(Mention)
     
-class Share(CommonColumns):
-    __tablename__ = 'share'
-    share = Column(String(2048))
-    timestamp = Column(DateTime) 
+class URL(CommonColumns):
+    __tablename__ = 'url'
+    url = Column(String(2048))
+    display_url = Column(String(2048))
+    expanded_url = Column(String(2048))
 
-class TweetShare(CommonColumns):
-    __tablename__ = 'tweet_share'
+class TweetURL(CommonColumns):
+    __tablename__ = 'tweet_url'
     tweet_id = Column(Integer, ForeignKey('tweet._id'), primary_key=True)
-    share_id = Column(Integer, ForeignKey('share._id'), primary_key=True)
-    #share = relationship(Share)
+    url_id = Column(Integer, ForeignKey('url._id'), primary_key=True)
+    #url = relationship(URL)
 
 class Tweet(CommonColumns):
     __tablename__ = 'tweet'
@@ -111,5 +124,6 @@ class Tweet(CommonColumns):
     user = relationship(User)
     hashtags = relationship(Hashtag, secondary='tweet_hashtag')
     mentions = relationship(Mention, secondary='tweet_mention')
-    shares = relationship(Share, secondary='tweet_share')
+    urls = relationship(URL, secondary='tweet_url')
+    media = relationship(Media, secondary='tweet_media')
 

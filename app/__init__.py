@@ -31,8 +31,10 @@ from app.models import (
     TweetHashtag,
     Mention,
     TweetMention,
-    Share,
-    TweetShare,
+    URL,
+    TweetURL,
+    Media,
+    TweetMedia,
     Tweet,
     Base
 )
