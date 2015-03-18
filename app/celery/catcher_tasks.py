@@ -1,4 +1,5 @@
 import sys
+import traceback
 from datetime import datetime
 import simplejson as json
 from celery import Celery
@@ -30,10 +31,20 @@ db = SQLAlchemy(app)
 db.Model = Base
 
 def _process_tweet(tweet_dict):
+    user_obj = db.session.query(User).filter(User.tw_id==tweet_dict.get('user', {}).get('id_str', None)).first()
+    if user_obj is None:
+        u = tweet_dict['user']
+        user_obj = User(
+            screen_name=u['screen_name'],
+            tw_id=u['id_str'],
+            location=u['location'],
+            json_str=json.dumps(u)
+        )
     tweet_obj = Tweet(
         tweet_id = tweet_dict['id_str'],
         timestamp = datetime.strptime(tweet_dict['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
-        json_str = json.dumps(tweet_dict)
+        json_str = json.dumps(tweet_dict),
+        user = user_obj
     )
     for hashtag in tweet_dict['entities']['hashtags']:
         hashtag_obj = db.session.query(Hashtag).filter(Hashtag.text==hashtag['text']).first()
@@ -79,11 +90,12 @@ def catch_stream(stream_name):
     for lot_obj in stream_obj.lots:
         for user_obj in lot_obj.users:
             follow.append(user_obj.tw_id)
-    #try:
-    sys.stderr.write('Stream catcher following: ' + repr(follow) + '\n')
-    follow_csv = ','.join(follow)
-    for tweet in twitter_stream.statuses.filter(follow=follow_csv, track=follow_csv):
+    try:
+        sys.stderr.write('Stream catcher following: ' + repr(follow) + '\n')
+        follow_csv = ','.join(follow)
+        for tweet in twitter_stream.statuses.filter(follow=follow_csv, track=follow_csv):
             sys.stderr.write('Incoming: '+tweet['id_str']+'\n') 
             _process_tweet(tweet)
-    #except Exception, e:
-    #    sys.stderr.write(repr(e)+'\n')
+    except Exception, e:
+        sys.stderr.write(pformat(tweet)+'\n')
+        sys.stderr.write(traceback.format_exc()+'\n')
