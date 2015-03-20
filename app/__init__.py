@@ -56,6 +56,7 @@ db.init_app(app)
 db.Model = Base
 # Build the database:
 # This will create the database file using SQLAlchemy
+app.config['SQLALCHEMY_ECHO'] = True
 db.create_all(app=app)
 
 # Import mods using blueprints

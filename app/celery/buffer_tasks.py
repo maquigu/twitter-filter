@@ -21,7 +21,6 @@ celery.conf.CELERY_RESULT_BACKEND = config.CELERY_RESULT_BACKEND
 auth = OAuth(config.TWITTER_ACCESS_KEY, config.TWITTER_ACCESS_SECRET, config.TWITTER_CONSUMER_KEY, config.TWITTER_CONSUMER_SECRET)
 twitter = Twitter(auth = auth)
 db = SQLAlchemy(app)
-db.Model = Base
 
 @celery.task
 def on_create_stream(stream_dict):

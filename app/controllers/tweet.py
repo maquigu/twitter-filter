@@ -6,19 +6,13 @@ import config
 from app import db
 
 # Import models
-from app.models import (
-    Stream, 
-    Lot, 
-    Owner,
-    User,
-    Tweet
-)
+from app.models import Stream, Lot, Owner
 
 # Import celery tasks
 from app.celery import buffer_tasks, catcher_tasks
 
-# Define the blueprint: 'streams', set its url prefix: app.url/streams
-stream_mod = Blueprint('streams', __name__, url_prefix='/streams')
+# Define the blueprint: 'stream', set its url prefix: app.url/stream
+stream_mod = Blueprint('stream', __name__, url_prefix='/stream')
 
 @stream_mod.route('/', methods=['POST'])
 def create():
@@ -77,9 +71,3 @@ def capture_stream():
             return jsonify(celery_task=repr(async_result_obj), message='success')
     return jsonify(dispatch=None, message='Unable to dispatch')
 
-@stream_mod.route('/<stream_name>/tweets', methods=['GET'])
-def get_stream_tweets(stream_name):
-    tweets = []
-    for response_obj in db.session.query(Tweet).join('user', 'lots', 'streams').filter(Stream.name==stream_name).all():
-        tweets.append(json.loads(response_obj.json_str))
-    return jsonify(tweets=tweets, message='success') 

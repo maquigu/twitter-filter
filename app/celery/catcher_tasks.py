@@ -28,7 +28,6 @@ celery.conf.CELERY_RESULT_BACKEND = config.CELERY_RESULT_BACKEND
 auth = OAuth(config.TWITTER_ACCESS_KEY, config.TWITTER_ACCESS_SECRET, config.TWITTER_CONSUMER_KEY, config.TWITTER_CONSUMER_SECRET)
 twitter_stream = TwitterStream(auth = auth)
 db = SQLAlchemy(app)
-db.Model = Base
 
 def _process_tweet(tweet_dict):
     user_obj = db.session.query(User).filter(User.tw_id==tweet_dict.get('user', {}).get('id_str', None)).first()
@@ -41,8 +40,8 @@ def _process_tweet(tweet_dict):
             json_str=json.dumps(u)
         )
     tweet_obj = Tweet(
-        tweet_id = tweet_dict['id_str'],
-        timestamp = datetime.strptime(tweet_dict['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
+        tw_id = tweet_dict['id_str'],
+        created_at = datetime.strptime(tweet_dict['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
         json_str = json.dumps(tweet_dict),
         user = user_obj
     )
@@ -74,7 +73,7 @@ def _process_tweet(tweet_dict):
         if media_obj is None:
             media_obj = Media(
                 tw_id = media['id_str'],
-                url = media['media_url'],
+                media_url = media['media_url'],
                 display_url = media['display_url']
             )
         tweet_obj.media.append(media_obj)
