@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-from app import init_app_db
 from app.models import (
     CommonColumns,
     Owner,
@@ -17,8 +16,9 @@ from app.models import (
     TweetURL,
     Media,
     TweetMedia,
-    Tweet
+    Tweet,
+    app,
+    db
 )
-app, db = init_app_db('config')
 db.drop_all(app=app)
 db.create_all(app=app)

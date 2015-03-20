@@ -1,50 +1,15 @@
 import os
 
 # Import flask and template operators
-from flask import Flask, render_template, send_from_directory
-
+from flask import render_template, send_from_directory
 # Import Bootstrap
 from flask_bootstrap import Bootstrap
-
-# Import SQLAlchemy
-from flask.ext.sqlalchemy import SQLAlchemy
-
+# DB Models
+from app.models import app, db
+# App config
 import config
 
-# DB Models
-from app.models import (
-    CommonColumns,
-    Owner,
-    User,
-    LotUser,
-    Lot,
-    StreamLot,
-    Stream,
-    Hashtag,
-    TweetHashtag,
-    Mention,
-    TweetMention,
-    URL,
-    TweetURL,
-    Media,
-    TweetMedia,
-    Tweet,
-    Base
-)
-
-def init_app_db(config_mod):
-    # Define the WSGI application object
-    app = Flask(__name__)
-    # Configurations loaded from config file
-    app.config.from_object(config_mod)
-    # Define the database object which is imported
-    # by mods and controllers
-    db = SQLAlchemy(app)
-    db.init_app(app)
-    db.Model = Base
-    return app, db
-
-app, db = init_app_db(config.FLASK_CONFIG_MODULE) 
+#app, db = init_app_db(config.FLASK_CONFIG_MODULE) 
 
 #app.config['SQLALCHEMY_ECHO'] = True #Enable to see raw SQL
 

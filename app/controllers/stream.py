@@ -2,16 +2,14 @@ import simplejson as json
 from flask import Blueprint, request, jsonify
 import config
 
-# Import the database object from the main app module
-from app import db
-
 # Import models
 from app.models import (
     Stream, 
     Lot, 
     Owner,
     User,
-    Tweet
+    Tweet,
+    db
 )
 
 # Import celery tasks
@@ -80,6 +78,13 @@ def capture_stream():
 @stream_mod.route('/<stream_name>/tweets', methods=['GET'])
 def get_stream_tweets(stream_name):
     tweets = []
-    for response_obj in db.session.query(Tweet).join('user', 'lots', 'streams').filter(Stream.name==stream_name).all():
-        tweets.append(json.loads(response_obj.json_str))
+    page = request.args.get('page')
+    if page is None:
+        page = 1
+    tweets_per_page = request.args.get('tpp')
+    if tweets_per_page is None:
+        tweets_per_page = config.TWEETS_PER_PAGE 
+    #for response_obj in db.session.query(Tweet).join('user', 'lots', 'streams').filter(Stream.name==stream_name).paginate(page, tweets_per_page, False):
+    for tweet_obj in Tweet.query.join('user', 'lots', 'streams').filter(Stream.name==stream_name).paginate(page, tweets_per_page, False).items:
+        tweets.append(json.loads(tweet_obj.json_str))
     return jsonify(tweets=tweets, message='success') 
