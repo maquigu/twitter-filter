@@ -3,8 +3,8 @@ import simplejson as json
 from celery import Celery
 import logging as log
 import config
-from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
+#from flask import Flask
+#from flask.ext.sqlalchemy import SQLAlchemy
 from twitter import *
 from pprint import pformat
 from app.models import (
@@ -12,15 +12,13 @@ from app.models import (
     Lot,
     Base
 )
+from app import init_app_db
 
-app = Flask(__name__)
-app.config.from_object('config')
-
+app, db = init_app_db(config.FLASK_CONFIG_MODULE)
 celery = Celery(config.CELERY_BUFFER_QUEUE, broker=config.CELERY_AMQP_BROKER)
 celery.conf.CELERY_RESULT_BACKEND = config.CELERY_RESULT_BACKEND
 auth = OAuth(config.TWITTER_ACCESS_KEY, config.TWITTER_ACCESS_SECRET, config.TWITTER_CONSUMER_KEY, config.TWITTER_CONSUMER_SECRET)
 twitter = Twitter(auth = auth)
-db = SQLAlchemy(app)
 
 @celery.task
 def on_create_stream(stream_dict):

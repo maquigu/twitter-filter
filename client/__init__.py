@@ -11,14 +11,14 @@ class TwitterBuffer(object):
         self.api_port=api_port
 
     def create_stream(self, stream_dict):
-        return self.perform_post('stream/', stream_dict)
+        return self.perform_post('streams/', stream_dict)
 
     def record(self, stream_name, command):
         data = {
             'stream_name': stream_name,
             'command': command
         }
-        return self.perform_post('stream/recorder/', data)
+        return self.perform_post('streams/recorder/', data)
 
     def perform_get(self, resource, params={}):
         response = None

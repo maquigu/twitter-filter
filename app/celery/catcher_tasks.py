@@ -5,8 +5,6 @@ import simplejson as json
 from celery import Celery
 import logging as log
 import config
-from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
 from twitter import *
 from pprint import pformat
 from app.models import (
@@ -19,15 +17,13 @@ from app.models import (
     Media,
     Base
 )
+from app import init_app_db
 
-app = Flask(__name__)
-app.config.from_object('config')
-
+app, db = init_app_db(config.FLASK_CONFIG_MODULE)
 celery = Celery(config.CELERY_CATCHER_QUEUE, broker=config.CELERY_AMQP_BROKER)
 celery.conf.CELERY_RESULT_BACKEND = config.CELERY_RESULT_BACKEND
 auth = OAuth(config.TWITTER_ACCESS_KEY, config.TWITTER_ACCESS_SECRET, config.TWITTER_CONSUMER_KEY, config.TWITTER_CONSUMER_SECRET)
 twitter_stream = TwitterStream(auth = auth)
-db = SQLAlchemy(app)
 
 def _process_tweet(tweet_dict):
     user_obj = db.session.query(User).filter(User.tw_id==tweet_dict.get('user', {}).get('id_str', None)).first()
