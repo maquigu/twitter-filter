@@ -6,25 +6,23 @@ from flask import render_template, send_from_directory
 from flask_bootstrap import Bootstrap
 # DB Models
 from app.models import app, db
-# App config
-import config
 
-#app, db = init_app_db(config.FLASK_CONFIG_MODULE) 
-
+# Set app root
+app.root_path = os.path.abspath(os.path.dirname(__file__))
 #app.config['SQLALCHEMY_ECHO'] = True #Enable to see raw SQL
 
 # Bootstrap it
 Bootstrap(app)
 # Import mods using blueprints
 from app.controllers.stream import stream_mod
-#from app.list.controllers import list_mod
-#from app.user.controllers import user_mod
-#from app.tweet.controllers import tweet_mod
+from app.controllers.lot import lot_mod
+from app.controllers.user import user_mod
+#from app.controllers.tweet import tweet_mod
 
 # Register blueprints
 app.register_blueprint(stream_mod)
-#app.register_blueprint(list_mod)
-#app.register_blueprint(user_mod)
+app.register_blueprint(lot_mod)
+app.register_blueprint(user_mod)
 #app.register_blueprint(tweet_mod)
 
 # route favicon

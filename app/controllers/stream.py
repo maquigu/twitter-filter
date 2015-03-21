@@ -81,10 +81,17 @@ def get_stream_tweets(stream_name):
     page = request.args.get('page')
     if page is None:
         page = 1
-    tweets_per_page = request.args.get('tpp')
-    if tweets_per_page is None:
-        tweets_per_page = config.TWEETS_PER_PAGE 
-    #for response_obj in db.session.query(Tweet).join('user', 'lots', 'streams').filter(Stream.name==stream_name).paginate(page, tweets_per_page, False):
-    for tweet_obj in Tweet.query.join('user', 'lots', 'streams').filter(Stream.name==stream_name).paginate(page, tweets_per_page, False).items:
+    else:
+        page = int(page)
+    per_page = request.args.get('per_page')
+    if per_page is None:
+        per_page = config.TWEETS_PER_PAGE 
+    else:
+        per_page = int(per_page)
+    for tweet_obj in Tweet.query.join(
+            'user', 'lots', 'streams'
+        ).filter(
+            Stream.name==stream_name
+        ).paginate(page, per_page, False).items:
         tweets.append(json.loads(tweet_obj.json_str))
     return jsonify(tweets=tweets, message='success') 
