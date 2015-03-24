@@ -81,14 +81,17 @@ def get_stream_tweets(stream_name):
     since_id = request.args.get('since_id')
     max_id = request.args.get('max_id')
     count = request.args.get('count')
-    if since_id is not None: # Means we're going forward 
+    direction = request.args.get('direction')
+    if direction == 'new': # Means we're going forward 
+        if since_id is None:
+            since_id = '0'
         for tweet_obj in Tweet.query.join(
                 'user', 'lots', 'streams'
             ).filter(
                 Stream.name == stream_name, Tweet.tw_id > since_id
             ).limit(count).all():
             tweets.append(json.loads(tweet_obj.json_str))
-    if max_id is not None: # Means we're going backwards
+    if direction == 'old' and max_id is not None: # Means we're going backwards
         for tweet_obj in Tweet.query.join(
                 'user', 'lots', 'streams'
             ).filter(
