@@ -78,6 +78,34 @@ def capture_stream():
 @stream_mod.route('/<stream_name>/tweets', methods=['GET'])
 def get_stream_tweets(stream_name):
     tweets = []
+    since_id = request.args.get('since_id')
+    max_id = request.args.get('max_id')
+    count = request.args.get('count')
+    if since_id is not None: # Means we're going forward 
+        for tweet_obj in Tweet.query.join(
+                'user', 'lots', 'streams'
+            ).filter(
+                Stream.name == stream_name, Tweet.tw_id > since_id
+            ).limit(count).all():
+            tweets.append(json.loads(tweet_obj.json_str))
+    if max_id is not None: # Means we're going backwards
+        for tweet_obj in Tweet.query.join(
+                'user', 'lots', 'streams'
+            ).filter(
+                Stream.name == stream_name, Tweet.tw_id < max_id
+            ).limit(count).all():
+            tweets.append(json.loads(tweet_obj.json_str))
+    return jsonify(
+        tweets=tweets, 
+        max_id=max_id, 
+        since_id=since_id,
+        direction=direction,
+        message='success'
+    ) 
+    
+@stream_mod.route('/<stream_name>/tweets-page', methods=['GET'])
+def get_stream_tweets_page(stream_name):
+    tweets = []
     page = request.args.get('page')
     if page is None:
         page = 1
@@ -95,3 +123,6 @@ def get_stream_tweets(stream_name):
         ).paginate(page, per_page, False).items:
         tweets.append(json.loads(tweet_obj.json_str))
     return jsonify(tweets=tweets, message='success') 
+
+
+

@@ -20,6 +20,14 @@ class TwitterBuffer(object):
         }
         return self.perform_post('streams/recorder/', data)
 
+    def get_stream_tweets(self, stream_name, since_id=None, max_id=None, count=config.TWEETS_PER_PAGE):
+        params = {
+            since_id: since_id,
+            max_id: max_id,
+            count: count
+        }
+        return self.perform_get('streams/%s/tweets' % stream_name, params)
+
     def perform_get(self, resource, params={}):
         response = None
         sys.stderr.write('Getting: ' + self.endpoint(resource) + '\n')
