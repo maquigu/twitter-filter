@@ -83,12 +83,12 @@ def catch_stream(stream_name):
     for lot_obj in stream_obj.lots:
         for user_obj in lot_obj.users:
             follow.append(user_obj.tw_id)
-    try:
-        sys.stderr.write('Stream catcher following: ' + repr(follow) + '\n')
-        follow_csv = ','.join(follow)
-        for tweet in twitter_stream.statuses.filter(follow=follow_csv, track=follow_csv):
-            sys.stderr.write('Incoming: '+tweet['id_str']+'\n') 
+    sys.stderr.write('Stream catcher following: ' + repr(follow) + '\n')
+    follow_csv = ','.join(follow)
+    for tweet in twitter_stream.statuses.filter(follow=follow_csv, track=follow_csv):
+        sys.stderr.write('Incoming: '+tweet['id_str']+'\n') 
+        try:
             _process_tweet(tweet)
-    except Exception, e:
-        sys.stderr.write(pformat(tweet)+'\n')
-        sys.stderr.write(traceback.format_exc()+'\n')
+        except Exception, e:
+            sys.stderr.write(pformat(tweet)+'\n')
+            sys.stderr.write(traceback.format_exc()+'\n')
