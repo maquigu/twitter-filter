@@ -89,21 +89,18 @@ def get_stream_tweets(stream_name):
                 'user', 'lots', 'streams'
             ).filter(
                 Stream.name == stream_name, Tweet.tw_id > since_id
-            ).limit(count).all():
+            ).order_by(Tweet.tw_id.desc()).limit(count).all():
             tweets.append(json.loads(tweet_obj.json_str))
     if direction == 'old' and max_id is not None: # Means we're going backwards
         for tweet_obj in Tweet.query.join(
                 'user', 'lots', 'streams'
             ).filter(
                 Stream.name == stream_name, Tweet.tw_id < max_id
-            ).limit(count).all():
+            ).order_by(Tweet.tw_id.desc()).limit(count).all():
             tweets.append(json.loads(tweet_obj.json_str))
     return jsonify(
-        tweets=tweets, 
-        max_id=max_id, 
-        since_id=since_id,
-        direction=direction,
-        message='success'
+        tweets=tweets, max_id=max_id, since_id=since_id,
+        direction=direction, message='success'
     ) 
     
 @stream_mod.route('/<stream_name>/tweets-page', methods=['GET'])
@@ -126,6 +123,3 @@ def get_stream_tweets_page(stream_name):
         ).paginate(page, per_page, False).items:
         tweets.append(json.loads(tweet_obj.json_str))
     return jsonify(tweets=tweets, message='success') 
-
-
-

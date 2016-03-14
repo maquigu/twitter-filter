@@ -86,8 +86,11 @@ def catch_stream(stream_name):
     sys.stderr.write('Stream catcher following: ' + repr(follow) + '\n')
     follow_csv = ','.join(follow)
     for tweet in twitter_stream.statuses.filter(follow=follow_csv, track=follow_csv):
-        sys.stderr.write('Incoming: '+tweet['id_str']+'\n') 
         try:
+            if 'id_str' in tweet:
+                sys.stderr.write('Incoming: '+tweet['id_str']+'\n') 
+            else:
+                sys.stderr.write('Missing id_str:\n'+tweet+'\n')
             _process_tweet(tweet)
         except Exception, e:
             sys.stderr.write(pformat(tweet)+'\n')
