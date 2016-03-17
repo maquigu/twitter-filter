@@ -1,6 +1,7 @@
 import simplejson as json
 from flask import Blueprint, request, jsonify
 import config
+from sqlalchemy import func
 
 # Import models
 from app.models import (
@@ -102,7 +103,26 @@ def get_stream_tweets(stream_name):
         tweets=tweets, max_id=max_id, since_id=since_id,
         direction=direction, message='success'
     ) 
-    
+
+@stream_mod.route('/<stream_name>/user-metrics', methods=['GET'])
+def get_stream_user_metrics(stream_name):
+    metrics = []
+    start_timestamp = request.args.get('start')
+    end_timestamp = request.args.get('end')        
+    q = Tweet.query(Tweet.user.screen_name, func.count(*)).join(
+        'user', 'lots', 'streams').filter(Stream.name == stream_name)
+    if start_timestamp is not None:
+        q = q.filter(Tweet.created_at >= start_timestamp)
+    if end_timestamp is not None and not "now":
+        q = q.filter(Tweet.created_at <= end_timestamp)
+
+    for r in q.group_by(Tweet.user.screen_name).limit(config.TOP_N).all():
+            metrics.append(json.loads(r.))
+    return jsonify(
+        metrics=metrics, start=start_timestamp, end=end_timestamp message='success'
+    ) 
+
+
 @stream_mod.route('/<stream_name>/tweets-page', methods=['GET'])
 def get_stream_tweets_page(stream_name):
     tweets = []
