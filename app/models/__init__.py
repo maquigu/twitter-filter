@@ -5,6 +5,7 @@ from sqlalchemy.orm import column_property, relationship, backref
 from sqlalchemy import func
 from sqlalchemy import (
     Column,
+    Boolean,
     String,
     Integer,
     ForeignKey,
@@ -89,6 +90,7 @@ class StreamLot(CommonColumns):
 class Stream(CommonColumns):
     __tablename__ = 'stream'
     name = db.Column(String(512))
+    active = db.Column(Boolean)
     lots = relationship(Lot, secondary='stream_lot', backref='streams')
 
 class Hashtag(CommonColumns):
