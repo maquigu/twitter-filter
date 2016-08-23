@@ -23,7 +23,7 @@ from app.models import (
     db
 )
 
-stream_timeout = 3
+stream_timeout = 90 
 auth = OAuth(config.TWITTER_ACCESS_KEY, config.TWITTER_ACCESS_SECRET, config.TWITTER_CONSUMER_KEY, config.TWITTER_CONSUMER_SECRET)
 
 def _process_tweet(tweet_dict):
@@ -36,6 +36,7 @@ def _process_tweet(tweet_dict):
             location=u['location'],
             json_str=json.dumps(u)
         )
+    insert(user_obj)
     tweet_obj = Tweet(
         tw_id = tweet_dict['id_str'],
         created_at = datetime.strptime(tweet_dict['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
@@ -46,6 +47,7 @@ def _process_tweet(tweet_dict):
         hashtag_obj = db.session.query(Hashtag).filter(Hashtag.text==hashtag['text']).first()
         if hashtag_obj is None:
             hashtag_obj = Hashtag(text=hashtag['text'])
+        insert(hashtag_obj)
         tweet_obj.hashtags.append(hashtag_obj)
     for mention in tweet_dict['entities']['user_mentions']:
         mention_obj = db.session.query(Mention).filter(Mention.screen_name==mention['screen_name']).first()
@@ -55,6 +57,7 @@ def _process_tweet(tweet_dict):
                 screen_name = mention['screen_name'],
                 name = mention['name']
             )
+        insert(mention_obj)
         tweet_obj.mentions.append(mention_obj)
     for url in tweet_dict['entities']['urls']:
         url_obj = db.session.query(URL).filter(URL.url==url['url']).first()
@@ -64,6 +67,7 @@ def _process_tweet(tweet_dict):
                 display_url = url['display_url'],
                 expanded_url = url['expanded_url']
             )
+        insert(url_obj)
         tweet_obj.urls.append(url_obj)
     for media in tweet_dict['entities'].get('media',[]): # media is not always present
         media_obj = db.session.query(Media).filter(Media.tw_id == media['id_str']).first()
@@ -73,9 +77,18 @@ def _process_tweet(tweet_dict):
                 media_url = media['media_url'],
                 display_url = media['display_url']
             )
+        insert(media_obj)
         tweet_obj.media.append(media_obj)
-    db.session.add(tweet_obj)
-    db.session.commit()
+    insert(tweet_obj)
+
+def insert(db_obj):
+    try:
+        db.session.add(db_obj)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+
 
 def follow_these():
     follow = []
@@ -86,7 +99,6 @@ def follow_these():
         for lot_obj in stream_obj.lots:
             for user_obj in lot_obj.users:
                 follow.append(user_obj.tw_id)
-    sys.stderr.write('Stream catcher following: ' + repr(follow) + '\n')
     return follow
 
 def catch_streams(timeout):
@@ -99,6 +111,7 @@ def catch_streams(timeout):
         follow_csv = ','.join(follow)
         twitter_stream = TwitterStream(auth=auth, timeout=timeout)
         last_check = int(time.time())
+        sys.stderr.write('Stream catcher following: ' + repr(follow) + '\n')
         for tweet in twitter_stream.statuses.filter(follow=follow_csv, track=follow_csv):
             try:
                 if tweet is None:
