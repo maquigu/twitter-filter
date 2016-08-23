@@ -18,7 +18,7 @@ from app.models import (
     db
 )
 
-celery = Celery(config.CELERY_CATCHER_QUEUE, broker=config.CELERY_AMQP_BROKER)
+celery = Celery(config.CELERY_CATCHER_QUEUE, broker=config.CELERY_BROKER)
 celery.conf.CELERY_RESULT_BACKEND = config.CELERY_RESULT_BACKEND
 auth = OAuth(config.TWITTER_ACCESS_KEY, config.TWITTER_ACCESS_SECRET, config.TWITTER_CONSUMER_KEY, config.TWITTER_CONSUMER_SECRET)
 twitter_stream = TwitterStream(auth = auth)
