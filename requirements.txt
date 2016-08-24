@@ -19,3 +19,4 @@ requests==2.5.3
 simplejson==3.6.5
 twitter==1.16.0
 wsgiref==0.1.2
+redis==2.10.5
