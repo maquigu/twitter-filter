@@ -101,10 +101,10 @@ def get_stream_user_metrics(stream_name):
     start_timestamp = request.args.get('start')
     end_timestamp = request.args.get('end')
     # These are comma-separated
-    users = request.args.getlist('f_user')
-    lots = request.args.getlist('f_lot')
-    hashtags = request.args.getlist('f_hashtag')
-    shares = request.args.getlist('f_share')
+    users = request.args.getlist('user_id')
+    lots = request.args.getlist('lot_id')
+    hashtags = request.args.getlist('hashtag_id')
+    shares = request.args.getlist('share_id')
     q = db.session.query(User._id, User.screen_name, func.count(Tweet.tw_id)). \
         join(Tweet). \
         join(LotUser). \
@@ -132,7 +132,7 @@ def get_stream_user_metrics(stream_name):
         um = {
             "user_id": r[0],
             "screen_name": r[1],
-            "tweets": r[1]
+            "tweets": r[2]
         }
         metrics.append(um)
     return jsonify(
@@ -175,7 +175,7 @@ def get_stream_url_metrics(stream_name):
     metrics = []
     start_timestamp = request.args.get('start')
     end_timestamp = request.args.get('end')
-    q = db.session.query(URL.expanded_url, func.count(Tweet.tw_id)). \
+    q = db.session.query(URL._id, URL.expanded_url, func.count(Tweet.tw_id)). \
         join(TweetURL). \
         join(Tweet). \
         join(User). \
@@ -193,8 +193,9 @@ def get_stream_url_metrics(stream_name):
     for r in q.all():
         ##sys.stderr.write("ROW: %s\n" % repr(r))
         m = {
-            "url": r[0],
-            "tweets": r[1]
+            "url_id": r[0],
+            "url": r[1],
+            "tweets": r[2]
         }
         metrics.append(m)
     return jsonify(
