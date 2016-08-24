@@ -112,13 +112,13 @@ def get_stream_user_metrics(stream_name):
         join(StreamLot). \
         join(Stream)
     q = q.filter(Stream.name == stream_name)
-    if users is not empty:
+    if users:
         q = q.filter(User._id.in_(users))
-    if lots is not empty:
+    if lots:
         q = q.filter(Lot._id.in_(lots))
-    if hashtags is not empty:
+    if hashtags:
         q = q.filter(Hashtag._id.in_(hashtags))
-    if shares is not empty:
+    if shares:
         q = q.join(TweetMedia).join(Media)
         q = q.filter(Media._id.in_(shares))
     if start_timestamp is not None:
