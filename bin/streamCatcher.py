@@ -126,7 +126,7 @@ def catch_streams(timeout):
                     printNicely("-- Processing --")
                     _process_tweet(tweet)
                 else:
-                    sys.stderr.write('Unparsed:\n'+tweet+'\n')
+                    sys.stderr.write('Unparsed:\n'+repr(tweet)+'\n')
                 now = int(time.time())
                 if now > (last_check + timeout):
                     last_check = now
