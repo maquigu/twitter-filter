@@ -158,6 +158,7 @@ def get_stream_lot_metrics(stream_name):
     metrics = []
     q = db.session.query(Lot._id, Lot.name, func.count(Tweet.tw_id)). \
         join(Tweet). \
+        join(User). \
         join(LotUser). \
         join(Lot). \
         join(StreamLot). \
