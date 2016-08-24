@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import time
+import socket
 import sys
+import os
+import time
 import traceback
 from datetime import datetime
 import simplejson as json
@@ -139,4 +141,16 @@ def catch_streams(timeout):
                 #sys.stderr.write(traceback.format_exc()+'\n')
                 sys.stderr.write(repr(e)+'\n')
 
+def get_lock():
+    global lock_socket   # Without this our lock gets garbage collected
+    lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    try:
+        lock_socket.bind('\0' + os.path.basename(__file__)) # look for own proc name
+        print 'Got the lock ... running.'
+    except socket.error:
+        print 'Lock exists, exiting.'
+        sys.exit()
+
+
+get_lock()
 catch_streams(stream_timeout)
