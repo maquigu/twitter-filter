@@ -134,11 +134,9 @@ def catch_streams(timeout):
                     if new_follow_csv != follow_csv:
                         sys.stderr.write('New follows ... restarting stream\n')
                         break
-            except IntegrityError:
-                sys,stderr.write("Parsing Error:", repr(e))
             except Exception, e:
                 #sys.stderr.write(pformat(tweet)+'\n')
-                sys.stderr.write(traceback.format_exc()+'\n')
-                db.session.
+                #sys.stderr.write(traceback.format_exc()+'\n')
+                sys.stderr.write(repr(e)+'\n')
 
 catch_streams(stream_timeout)
