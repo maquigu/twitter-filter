@@ -36,13 +36,22 @@ TWITTER_CONSUMER_KEY = ""
 TWITTER_CONSUMER_SECRET = ""
 
 # Celery params
-CELERY_QUEUE = "twitter_buffer"
-CELERY_AMQP_BROKER = "amqp://guest:guest@localhost:5672"
+CELERY_BUFFER_QUEUE = "twitter_buffer"
+CELERY_CATCHER_QUEUE = "twitter_catcher"
+#CELERY_BROKER = "amqp://guest:guest@localhost:5672"
+CELERY_BROKER = "redis://localhost:6379/0"
+#CELERY_RESULT_BACKEND = "amqp"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 # API location (for client)
-
 API_HOST = "localhost"
 API_PORT = 8080
+
+# Flask params
+FLASK_CONFIG_MODULE = 'config' # This must match a config file, e.g. config.py
+
+# Pagination default
+TWEETS_PER_PAGE = 20
 
 # Defaults for metrics
 TOP_N = 10
