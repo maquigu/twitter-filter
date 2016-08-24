@@ -66,26 +66,6 @@ def create():
         return  jsonify(response=resp, message='success')
     else:
         return jsonify(stream_name=None, message='stream_name required.')
-    
-
-#def _capture_stream_callback(response):
-    #sys.stderr.write('Returning from Celery: %r\n' % response)
-
-@stream_mod.route('/recorder/', methods=['POST'])
-def capture_stream():
-    req = json.loads(request.data)
-    if isinstance(req, dict) and 'stream_name' in req:
-        stream_name = req['stream_name']
-        command = req['command']
-        if command == 'on':
-            async_result_obj = catcher_tasks.catch_stream.apply_async(
-                args=[stream_name], 
-                queue=config.CELERY_CATCHER_QUEUE, 
-                callback=_capture_stream_callback
-            )
-            #return jsonify(celery_task_id=async_result_obj.id, status=async_result_obj.status, message='success')
-            return jsonify(celery_task=repr(async_result_obj), message='success')
-    return jsonify(dispatch=None, message='Unable to dispatch')
 
 @stream_mod.route('/<stream_name>/tweets', methods=['GET'])
 def get_stream_tweets(stream_name):
@@ -119,16 +99,28 @@ def get_stream_tweets(stream_name):
 def get_stream_user_metrics(stream_name):
     metrics = []
     start_timestamp = request.args.get('start')
-    end_timestamp = request.args.get('end')        
-    #q = Tweet.query(User.screen_name, func.count(Tweet.tw_id))
-    q = db.session.query(User.screen_name, func.count(Tweet.tw_id)). \
+    end_timestamp = request.args.get('end')
+    # These are comma-separated
+    users = request.args.getlist('f_user')
+    lots = request.args.getlist('f_lot')
+    hashtags = request.args.getlist('f_hashtag')
+    shares = request.args.getlist('f_share')
+    q = db.session.query(User._id, User.screen_name, func.count(Tweet.tw_id)). \
         join(Tweet). \
         join(LotUser). \
         join(Lot). \
         join(StreamLot). \
         join(Stream)
-    #q = db.session.query(Tweet.user_id, func.count(Tweet.user_id))
     q = q.filter(Stream.name == stream_name)
+    if users is not empty:
+        q = q.filter(User._id.in_(users))
+    if lots is not empty:
+        q = q.filter(Lot._id.in_(lots))
+    if hashtags is not empty:
+        q = q.filter(Hashtag._id.in_(hashtags))
+    if shares is not empty:
+        q = q.join(TweetMedia).join(Media)
+        q = q.filter(Media._id.in_(shares))
     if start_timestamp is not None:
         q = q.filter(Tweet.created_at >= start_timestamp)
     if end_timestamp is not None and not "now":
@@ -138,7 +130,8 @@ def get_stream_user_metrics(stream_name):
     for r in q.all():
         #sys.stderr.write("ROW: %s\n" % repr(r))
         um = {
-            "screen_name": r[0],
+            "user_id": r[0],
+            "screen_name": r[1],
             "tweets": r[1]
         }
         metrics.append(um)
