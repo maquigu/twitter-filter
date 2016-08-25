@@ -125,7 +125,7 @@ def catch_streams(timeout):
                 elif tweet is Hangup:
                     printNicely("-- Hangup --")
                 elif tweet.get('text'):
-                    printNicely("-- Processing --")
+                    #printNicely("-- Processing --")
                     _process_tweet(tweet)
                 else:
                     sys.stderr.write('Unparsed:\n'+repr(tweet)+'\n')
