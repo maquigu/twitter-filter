@@ -244,7 +244,6 @@ def hashtag_metrics(filters):
         join(Lot). \
         join(StreamLot). \
         join(Stream)
-    q = q.filter(Stream.name == stream_name)
     q = set_query_filters(q, **filters)
     q = q.group_by(Hashtag.text).limit(config.TOP_N)
     #sys.stderr.write("QUERY: %s\n" % str(q))
