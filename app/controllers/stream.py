@@ -98,7 +98,7 @@ def get_stream_tweets(stream_name):
 @stream_mod.route('/<stream_name>/tweets+metrics', methods=['GET'])
 def get_stream_tweets_and_metrics(stream_name):
     filters = get_filters(stream_name)
-    tweets, max_id, since_id = filter_tweets(filters, count)
+    tweets, max_id, since_id = filter_tweets(filters, config.TWEETS_PER_PAGE)
     return jsonify(
         tweets=tweets, max_id=max_id, since_id=since_id, direction="new",
         total=stream_total(), user_metrics=user_metrics(filters),
