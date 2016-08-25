@@ -312,9 +312,9 @@ def filter_tweets(filters, limit):
         join(LotUser). \
         join(Lot). \
         join(StreamLot). \
-        join(Stream).\
-        limit(limit)
+        join(Stream)
     q = set_query_filters(q, **filters)
+    q = q.limit(limit)
     for r in q.all():
         tweets.append(json.loads(r[1]))
         if tw_id_max == 0 or r[0] > tw_id_max:
