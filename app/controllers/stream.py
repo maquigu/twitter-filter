@@ -83,7 +83,7 @@ def get_stream_tweets(stream_name):
                 Stream.name == stream_name, Tweet.tw_id > since_id
             ).order_by(Tweet.tw_id.desc()).limit(count).all():
             tweets.append(json.loads(tweet_obj.json_str))
-    if direction == 'old' and max_id is not None: # Means we're going backwards
+    elif direction == 'old' and max_id is not None: # Means we're going backwards
         for tweet_obj in Tweet.query.join(
                 'user', 'lots', 'streams'
             ).filter(
@@ -94,6 +94,18 @@ def get_stream_tweets(stream_name):
         tweets=tweets, max_id=max_id, since_id=since_id,
         direction=direction, message='success'
     ) 
+
+@stream_mod.route('/<stream_name>/tweets+metrics', methods=['GET'])
+def get_stream_tweets_and_metrics(stream_name):
+    filters = get_filters(stream_name)
+    tweets, max_id, since_id = filter_tweets(filters, count)
+    return jsonify(
+        tweets=tweets, max_id=max_id, since_id=since_id, direction="new",
+        total=stream_total(), user_metrics=user_metrics(filters),
+        hashtag_metrics=hashtag_metrics(filters), lot_metrics=lot_metrics(filters),
+        url_metrics=url_metrics(filters), message='success'
+    )
+
 
 @stream_mod.route('/<stream_name>/user-metrics', methods=['GET'])
 def get_stream_user_metrics(stream_name):
@@ -269,7 +281,6 @@ def url_metrics(filters):
         join(Lot). \
         join(StreamLot). \
         join(Stream)
-    q = q.filter(Stream.name == stream_name)
     q = set_query_filters(q, **filters)
     q = q.group_by(URL.expanded_url).limit(config.TOP_N)
     for r in q.all():
@@ -281,4 +292,34 @@ def url_metrics(filters):
         metrics.append(m)
     return metrics
 
+
+def stream_total(stream_name):
+    q = db.session.query(Tweet).\
+        join(User). \
+        join(LotUser). \
+        join(Lot). \
+        join(StreamLot). \
+        join(Stream)
+    q = set_query_filters(q, stream_name=stream_name)
+    return q.count()
+
+def filter_tweets(filters, limit):
+    tweets = []
+    tw_id_max = 0
+    tw_id_min = 0
+    q = db.session.query(Tweet.tw_id, Tweet.json_str).\
+        join(User). \
+        join(LotUser). \
+        join(Lot). \
+        join(StreamLot). \
+        join(Stream).\
+        limit(limit)
+    q = set_query_filters(q, **filters)
+    for r in q.all():
+        tweets.append(json.loads(r[1]))
+        if tw_id_max == 0 or r[0] > tw_id_max:
+            tw_id_max = r[0]
+        elif tw_id_min == 0 or r[0] < tw_id_min:
+            tw_id_min = r[0]
+    return tweets, tw_id_max, tw_id_min
 
