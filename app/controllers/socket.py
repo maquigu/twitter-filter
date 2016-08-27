@@ -74,6 +74,6 @@ def get_stream_tweets_and_metrics(stream_name):
                 top_urls=query.url_metrics(filters), message='success'
             ))
         except Exception, e:
-            ws.send(jsonify(message='error', 'details'=repr(e)))
+            ws.send(jsonify(message='error', details=repr(e)))
 
 
