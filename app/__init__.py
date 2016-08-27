@@ -4,6 +4,8 @@ import os
 from flask import render_template, send_from_directory
 # Import Bootstrap
 from flask_bootstrap import Bootstrap
+# Import Flask-sockets
+from flask_sockets import Sockets
 # DB Models
 from app.models import app, db
 
@@ -17,13 +19,21 @@ Bootstrap(app)
 from app.controllers.stream import stream_mod
 from app.controllers.lot import lot_mod
 from app.controllers.user import user_mod
-#from app.controllers.tweet import tweet_mod
+from app.controllers.socket import socket_mod
+
+# Setup Web Socket
+sockets = Sockets(app)
+
 
 # Register blueprints
 app.register_blueprint(stream_mod)
 app.register_blueprint(lot_mod)
 app.register_blueprint(user_mod)
 #app.register_blueprint(tweet_mod)
+sockets.register_blueprint(socket_mod)
+@app.route('/')
+def default():
+	return  jsonify(message='success')
 
 # route favicon
 @app.route('/favicon.ico')
