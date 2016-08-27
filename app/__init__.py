@@ -1,7 +1,7 @@
 import os
 
 # Import flask and template operators
-from flask import render_template, send_from_directory
+from flask import render_template, send_from_directory, jsonify
 # Import Bootstrap
 from flask_bootstrap import Bootstrap
 # Import Flask-sockets
