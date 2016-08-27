@@ -60,45 +60,20 @@ def get_stream_tweets(stream_name):
 
 @socket_mod.route('/all-metrics')
 def get_stream_tweets_and_metrics(stream_name):
-    filters = get_filters(stream_name)
-    tweets, max_id, since_id = query.filter_tweets(filters, config.TWEETS_PER_PAGE)
-    return jsonify(
-        tweets=tweets, max_id=max_id, since_id=since_id, direction="new",
-        total=stream_total(stream_name), top_users=user_metrics(filters),
-        top_hashtags=hashtag_metrics(filters), top_lots=lot_metrics(filters),
-        top_urls=url_metrics(filters), message='success'
-    )
+    while not ws.closed:
+        try:
+            message = json.loads(ws.receive())
+            if "filters" in message:
+                filters = message["filters"]
+            else:
+                filters = {}
+            tweets, max_id, since_id = query.filter_tweets(filters, config.TWEETS_PER_PAGE)
+            ws.send(jsonify(
+                total=query.stream_total(stream_name), top_users=query.user_metrics(filters),
+                top_hashtags=query.hashtag_metrics(filters), top_lots=query.lot_metrics(filters),
+                top_urls=query.url_metrics(filters), message='success'
+            ))
+        except Exception, e:
+            ws.send(jsonify(message='error', 'details'=repr(e)))
 
-
-@socket_mod.route('/user-metrics')
-def get_stream_user_metrics(stream_name):
-    filters = get_filters(stream_name)
-    metrics = query.user_metrics(filters)
-    return jsonify(
-        metrics=metrics, filters=filters, message='success'
-    ) 
-
-@socket_mod.route('/lot-metrics')
-def get_stream_lot_metrics(stream_name):
-    filters = get_filters(stream_name)
-    metrics = query.lot_metrics(filters)
-    return jsonify(
-        metrics=metrics, filters=filters, message='success'
-    ) 
-
-@socket_mod.route('/hashtag-metrics')
-def get_stream_hashtag_metrics(stream_name):
-    filters = get_filters(stream_name)
-    metrics = query.hashtag_metrics(filters)
-    return jsonify(
-        metrics=metrics, filters=filters, message='success'
-    )
-
-@socket_mod.route('/url-metrics')
-def get_stream_url_metrics(stream_name):
-    filters = get_filters(stream_name)
-    metrics = query.url_metrics(filters)
-    return jsonify(
-        metrics=metrics, filters=filters, message='success'
-    )
 
