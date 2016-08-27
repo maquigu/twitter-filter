@@ -1,5 +1,6 @@
 import config
 from sqlalchemy import func
+import simplejson as json
 
 # Import models
 from app.models import (
@@ -105,8 +106,6 @@ def hashtag_metrics(filters):
 
 def url_metrics(filters):
     metrics = []
-    start_timestamp = request.args.get('start')
-    end_timestamp = request.args.get('end')
     q = db.session.query(URL._id, URL.expanded_url, func.count(Tweet.tw_id)). \
         join(TweetURL). \
         join(Tweet). \

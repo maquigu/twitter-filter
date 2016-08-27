@@ -8,5 +8,5 @@ from app import app
 # Run the server.
 
 #app.run(host='0.0.0.0', port=8080, debug=True)
-server = pywsgi.WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
+server = pywsgi.WSGIServer(('', config.API_PORT), app, handler_class=WebSocketHandler)
 server.serve_forever()

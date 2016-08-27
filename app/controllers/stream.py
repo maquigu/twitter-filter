@@ -104,9 +104,9 @@ def get_stream_tweets_and_metrics(stream_name):
     tweets, max_id, since_id = query.filter_tweets(filters, config.TWEETS_PER_PAGE)
     return jsonify(
         tweets=tweets, max_id=max_id, since_id=since_id, direction="new",
-        total=stream_total(stream_name), top_users=user_metrics(filters),
-        top_hashtags=hashtag_metrics(filters), top_lots=lot_metrics(filters),
-        top_urls=url_metrics(filters), message='success'
+        total=query.stream_total(stream_name), top_users=query.user_metrics(filters),
+        top_hashtags=query.hashtag_metrics(filters), top_lots=query.lot_metrics(filters),
+        top_urls=query.url_metrics(filters), message='success'
     )
 
 
