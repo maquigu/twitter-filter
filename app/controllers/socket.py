@@ -75,10 +75,10 @@ def get_stream_tweets_and_metrics(ws):
             json_out = json.dumps({
                 'total':query.stream_total(stream_name), 
                 'top_users':query.user_metrics(filters),
-                'top_hashtags':query.hashtag_metrics(filters)
-                'top_lots'=query.lot_metrics(filters),
-                'top_urls'=query.url_metrics(filters), 
-                'message'='success'
+                'top_hashtags':query.hashtag_metrics(filters),
+                'top_lots':query.lot_metrics(filters),
+                'top_urls':query.url_metrics(filters), 
+                'message':'success'
             })
             ws.send(json_out)
         except Exception, e:
