@@ -23,7 +23,7 @@ from app.models import (
 )
 
 # set_query_filters sets the query filters based on above 
-def set_query_filters(q, stream_name=None, users=[], lots=[], hashtags=[], shares=[], start=[], end=[]):
+def set_query_filters(q, stream_name=None, users=[], lots=[], hashtags=[], urls=[], start=[], end=[]):
     if stream_name:
         q = q.filter(Stream.name == stream_name)
     if users:
@@ -32,9 +32,9 @@ def set_query_filters(q, stream_name=None, users=[], lots=[], hashtags=[], share
         q = q.filter(Lot._id.in_(lots))
     if hashtags:
         q = q.filter(Hashtag._id.in_(hashtags))
-    if shares:
-        q = q.join(TweetMedia).join(Media)
-        q = q.filter(Media._id.in_(shares))
+    if urls:
+        q = q.join(TweetURL).join(URL)
+        q = q.filter(URL._id.in_(urls))
     if start:
         q = q.filter(Tweet.created_at >= start_timestamp)
     if end and end is not "now":
