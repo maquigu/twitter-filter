@@ -1,4 +1,5 @@
 import simplejson as json
+import logging as log
 import sys
 from flask import Blueprint, request, jsonify
 import config
@@ -49,6 +50,7 @@ def get_stream_tweets(ws):
                 direction=direction, message='success'
             ))
         except Exception, e:
+            log.critical("WS Error in tweets:", repr(e))
             ws.send(jsonify(message='error', details=repr(e)))
 
 @socket_mod.route('/metrics')
