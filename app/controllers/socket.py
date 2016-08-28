@@ -36,6 +36,7 @@ def get_stream_tweets(ws):
     while not ws.closed:
         try:
             message = json.loads(ws.receive())
+            log.info("Tweets Message:", message)
             if "filters" in message:
                 filters = message["filters"]
             else:
