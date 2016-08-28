@@ -153,7 +153,7 @@ def filter_tweets(filters, max_id, since_id, count, direction):
         q = q.filter(Tweet.tw_id > since_id)
     elif direction == 'old' and max_id is not None: # Means we're going backwards
         q = q.filter(Tweet.tw_id < max_id)
-    for r in q.order_by(Tweet.tw_id.desc()).limit(limit).all():
+    for r in q.order_by(Tweet.tw_id.desc()).limit(count).all():
         tweets.append(json.loads(r[1]))
         if tw_id_max == 0 or r[0] > tw_id_max:
             tw_id_max = r[0]
