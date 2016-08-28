@@ -32,31 +32,24 @@ socket_mod = Blueprint('sockets', __name__, url_prefix='/sockets')
 
 @socket_mod.route('/tweets')
 def get_stream_tweets(stream_name):
-    tweets = []
-    since_id = request.args.get('since_id')
-    max_id = request.args.get('max_id')
-    count = request.args.get('count')
-    direction = request.args.get('direction')
-    if direction == 'new': # Means we're going forward 
-        if since_id is None:
-            since_id = '0'
-        for tweet_obj in Tweet.query.join(
-                'user', 'lots', 'streams'
-            ).filter(
-                Stream.name == stream_name, Tweet.tw_id > since_id
-            ).order_by(Tweet.tw_id.desc()).limit(count).all():
-            tweets.append(json.loads(tweet_obj.json_str))
-    elif direction == 'old' and max_id is not None: # Means we're going backwards
-        for tweet_obj in Tweet.query.join(
-                'user', 'lots', 'streams'
-            ).filter(
-                Stream.name == stream_name, Tweet.tw_id < max_id
-            ).order_by(Tweet.tw_id.desc()).limit(count).all():
-            tweets.append(json.loads(tweet_obj.json_str))
-    return jsonify(
-        tweets=tweets, max_id=max_id, since_id=since_id,
-        direction=direction, message='success'
-    ) 
+    while not ws.closed:
+        try:
+            message = json.loads(ws.receive())
+            if "filters" in message:
+                filters = message["filters"]
+            else:
+                filters = {}
+            max_id = message.get("max_id", None)
+            since_id = message.get("since_id", None)
+            count = message.get("count", None)
+            direction = message.get("direction", None)
+            tweets, max_id, since_id = query.filter_tweets(filters, max_id, since_id, count, direction)
+            ws.send(jsonify(
+                tweets=tweets, max_id=max_id, since_id=since_id,
+                direction=direction, message='success'
+            ))
+        except Exception, e:
+            ws.send(jsonify(message='error', details=repr(e)))
 
 @socket_mod.route('/all-metrics')
 def get_stream_tweets_and_metrics(stream_name):
