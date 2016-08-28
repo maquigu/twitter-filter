@@ -31,7 +31,7 @@ from app.models import query
 socket_mod = Blueprint('sockets', __name__, url_prefix='/sockets')
 
 @socket_mod.route('/tweets')
-def get_stream_tweets(stream_name):
+def get_stream_tweets(ws):
     while not ws.closed:
         try:
             message = json.loads(ws.receive())
@@ -51,8 +51,8 @@ def get_stream_tweets(stream_name):
         except Exception, e:
             ws.send(jsonify(message='error', details=repr(e)))
 
-@socket_mod.route('/all-metrics')
-def get_stream_tweets_and_metrics(stream_name):
+@socket_mod.route('/metrics')
+def get_stream_tweets_and_metrics(ws):
     while not ws.closed:
         try:
             message = json.loads(ws.receive())
