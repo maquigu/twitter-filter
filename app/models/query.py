@@ -136,7 +136,7 @@ def stream_total(stream_name):
     q = set_query_filters(q, stream_name=stream_name)
     return q.count()
 
-def filter_tweets(filters, limit):
+def filter_tweets(filters, max_id, since_id, count, direction):
     tweets = []
     tw_id_max = 0
     tw_id_min = 0
@@ -147,8 +147,13 @@ def filter_tweets(filters, limit):
         join(StreamLot). \
         join(Stream)
     q = set_query_filters(q, **filters)
-    q = q.limit(limit)
-    for r in q.all():
+    if direction == 'new': # Means we're going forward 
+        if since_id is None:
+            since_id = '0'
+        q = q.filter(Tweet.tw_id > since_id)
+    elif direction == 'old' and max_id is not None: # Means we're going backwards
+        q = q.filter(Tweet.tw_id < max_id)
+    for r in q.order_by(Tweet.tw_id.desc()).limit(limit).all():
         tweets.append(json.loads(r[1]))
         if tw_id_max == 0 or r[0] > tw_id_max:
             tw_id_max = r[0]
