@@ -45,10 +45,12 @@ def get_stream_tweets(ws):
             count = message.get("count", None)
             direction = message.get("direction", None)
             tweets, max_id, since_id = query.filter_tweets(filters, max_id, since_id, count, direction)
-            ws.send(jsonify(
+            json_out = jsonify(
                 tweets=tweets, max_id=max_id, since_id=since_id,
                 direction=direction, message='success'
-            ))
+            )
+            log.info("Socket Out:", json_out)
+            ws.send(json_out)
         except Exception, e:
             log.critical("WS Error in tweets: "+repr(e))
             ws.send(jsonify(message='error', details=repr(e)))
