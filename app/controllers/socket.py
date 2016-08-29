@@ -28,10 +28,10 @@ from app.models import (
 # Import model queries
 from app.models import query
 
-# Define the blueprint: 'streams', set its url prefix: app.url/streams
-socket_mod = Blueprint('sockets', __name__, url_prefix='/sockets')
+# Define the blueprint: "streams", set its url prefix: app.url/streams
+socket_mod = Blueprint("sockets", __name__, url_prefix="/sockets")
 
-@socket_mod.route('/tweets')
+@socket_mod.route("/tweets")
 def get_stream_tweets(ws):
     while not ws.closed:
         try:
@@ -47,22 +47,22 @@ def get_stream_tweets(ws):
             direction = message.get("direction", None)
             tweets, max_id, since_id = query.filter_tweets(filters, max_id, since_id, count, direction)
             json_out = json.dumps({
-                'tweets':tweets, 
-                'max_id':max_id, 
-                'since_id':since_id,
-                'direction':direction, 
-                'status':'success'
+                "tweets":tweets, 
+                "max_id":max_id, 
+                "since_id":since_id,
+                "direction":direction, 
+                "status":"success"
             })
             #log.critical("Socket Out: "+repr(json_out))
             ws.send(json_out)
         except Exception, e:
-            log.critical("WS Error in tweets: "+repr(e))
+            log.exception("WS Error in tweets: "+repr(e))
             json_out = json.dumps({
-                'status': 'error',
-                'message': repr(e)
+                "status": "error",
+                "message": repr(e)
             })
 
-@socket_mod.route('/metrics')
+@socket_mod.route("/metrics")
 def get_stream_tweets_and_metrics(ws):
     while not ws.closed:
         try:
@@ -70,21 +70,21 @@ def get_stream_tweets_and_metrics(ws):
             log.critical("Metrics Message: "+repr(message))
             filters = message["filters"]
             json_out = json.dumps({
-                'metrics': {
-                    'total':query.stream_total(filters.stream_name), 
-                    'top_users':query.user_metrics(filters),
-                    'top_hashtags':query.hashtag_metrics(filters),
-                    'top_lots':query.lot_metrics(filters),
-                    'top_urls':query.url_metrics(filters)
+                "metrics": {
+                    "total": query.stream_total(filters["stream_name"]), 
+                    "top_users": query.user_metrics(filters),
+                    "top_hashtags": query.hashtag_metrics(filters),
+                    "top_lots": query.lot_metrics(filters),
+                    "top_urls": query.url_metrics(filters)
                 },
-                'status':'success'
+                "status":"success"
             })
             ws.send(json_out)
         except Exception, e:
-            log.critical("WS Error in metrics: "+repr(e))
+            log.exception("WS Error in Metrics: "+repr(e))
             json_out = json.dumps({
-                'status': 'error',
-                'message': repr(e)
+                "status": "error",
+                "message": repr(e)
             })
 
 
