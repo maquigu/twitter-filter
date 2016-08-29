@@ -51,15 +51,15 @@ def get_stream_tweets(ws):
                 'max_id':max_id, 
                 'since_id':since_id,
                 'direction':direction, 
-                'message':'success'
+                'status':'success'
             })
             #log.critical("Socket Out: "+repr(json_out))
             ws.send(json_out)
         except Exception, e:
             log.critical("WS Error in tweets: "+repr(e))
             json_out = json.dumps({
-                'message': 'error',
-                'details': repr(e)
+                'status': 'error',
+                'message': repr(e)
             })
 
 @socket_mod.route('/metrics')
@@ -73,12 +73,14 @@ def get_stream_tweets_and_metrics(ws):
                 filters = {}
             tweets, max_id, since_id = query.filter_tweets(filters, config.TWEETS_PER_PAGE)
             json_out = json.dumps({
-                'total':query.stream_total(stream_name), 
-                'top_users':query.user_metrics(filters),
-                'top_hashtags':query.hashtag_metrics(filters),
-                'top_lots':query.lot_metrics(filters),
-                'top_urls':query.url_metrics(filters), 
-                'message':'success'
+                'metrics': {
+                    'total':query.stream_total(stream_name), 
+                    'top_users':query.user_metrics(filters),
+                    'top_hashtags':query.hashtag_metrics(filters),
+                    'top_lots':query.lot_metrics(filters),
+                    'top_urls':query.url_metrics(filters)
+                },
+                'status':'success'
             })
             ws.send(json_out)
         except Exception, e:
