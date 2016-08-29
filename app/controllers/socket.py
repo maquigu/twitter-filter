@@ -67,14 +67,11 @@ def get_stream_tweets_and_metrics(ws):
     while not ws.closed:
         try:
             message = json.loads(ws.receive())
-            if "filters" in message:
-                filters = message["filters"]
-            else:
-                filters = {}
-            tweets, max_id, since_id = query.filter_tweets(filters, config.TWEETS_PER_PAGE)
+            log.critical("Metrics Message: "+repr(message))
+            filters = message["filters"]
             json_out = json.dumps({
                 'metrics': {
-                    'total':query.stream_total(stream_name), 
+                    'total':query.stream_total(filters.stream_name), 
                     'top_users':query.user_metrics(filters),
                     'top_hashtags':query.hashtag_metrics(filters),
                     'top_lots':query.lot_metrics(filters),
@@ -86,8 +83,8 @@ def get_stream_tweets_and_metrics(ws):
         except Exception, e:
             log.critical("WS Error in metrics: "+repr(e))
             json_out = json.dumps({
-                'message': 'error',
-                'details': repr(e)
+                'status': 'error',
+                'message': repr(e)
             })
 
 
