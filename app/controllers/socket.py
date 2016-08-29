@@ -63,7 +63,7 @@ def get_stream_tweets(ws):
             })
 
 @socket_mod.route("/metrics")
-def get_stream_tweets_and_metrics(ws):
+def get_stream_metrics(ws):
     while not ws.closed:
         try:
             message = json.loads(ws.receive())
