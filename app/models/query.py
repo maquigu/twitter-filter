@@ -55,8 +55,8 @@ def user_metrics(filters):
     for r in q.all():
         #sys.stderr.write("ROW: %s\n" % repr(r))
         um = {
-            "user_id": r[0],
-            "screen_name": r[1],
+            "id": r[0],
+            "name": r[1],
             "tweets": r[2]
         }
         metrics.append(um)
@@ -74,8 +74,8 @@ def lot_metrics(filters):
     q = q.group_by(User.screen_name).limit(config.TOP_N)
     for r in q.all():
         um = {
-            "lot_id": r[0],
-            "lot_name": r[1],
+            "id": r[0],
+            "name": r[1],
             "tweets": r[2]
         }
         metrics.append(um)
@@ -97,8 +97,8 @@ def hashtag_metrics(filters):
     for r in q.all():
         #sys.stderr.write("ROW: %s\n" % repr(r))
         hm = {
-            "hashtag_id": r[0],
-            "hashtag": r[1],
+            "id": r[0],
+            "name": r[1],
             "tweets": r[2]
         }
         metrics.append(hm)
@@ -118,8 +118,8 @@ def url_metrics(filters):
     q = q.group_by(URL.expanded_url).limit(config.TOP_N)
     for r in q.all():
         m = {
-            "url_id": r[0],
-            "url": r[1],
+            "id": r[0],
+            "name": r[1],
             "tweets": r[2]
         }
         metrics.append(m)
