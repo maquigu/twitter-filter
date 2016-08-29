@@ -36,7 +36,7 @@ def get_stream_tweets(ws):
     while not ws.closed:
         try:
             message = json.loads(ws.receive())
-            log.critical("Tweets Message: "+repr(message))
+            log.info("Tweets Message: "+repr(message))
             if "filters" in message:
                 filters = message["filters"]
             else:
@@ -67,11 +67,11 @@ def get_stream_tweets_and_metrics(ws):
     while not ws.closed:
         try:
             message = json.loads(ws.receive())
-            log.critical("Metrics Message: "+repr(message))
+            log.info("Metrics Message: "+repr(message))
             filters = message["filters"]
             json_out = json.dumps({
                 "metrics": {
-                    "total": query.stream_total(filters["stream_name"]), 
+                    "total_tweets": query.stream_total(filters["stream_name"]), 
                     "top_users": query.user_metrics(filters),
                     "top_hashtags": query.hashtag_metrics(filters),
                     "top_lots": query.lot_metrics(filters),
