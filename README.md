@@ -1,5 +1,5 @@
-# Twitter Buffer
-A Twitter buffer consisting of a configurable streaming daemon, a database and a RESTful API
+# Twitter Filter
+A Twitter filtering system
 
 
 # Runtime
