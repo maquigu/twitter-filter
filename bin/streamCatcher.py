@@ -91,11 +91,13 @@ def insert(db_obj):
         db.session.commit()
         rollback_ctr = 0
     except:
+        sys.stderr.write('Exception rollback_ctr: ' + rollback_ctr)
         if rollback_ctr == 0:
+            sys,stderr.write('Rolling back ...')
             db.session.rollback()
             rollback_ctr += 1
         else:
-            sys.stderr.write('rollback_ctr: '+rollback_ctr)
+            sys.stderr.write('Resetting db.session ...')
             # reset db.session
             db.close()
             db.init_app(app)
@@ -148,8 +150,10 @@ def catch_streams(timeout):
                         break
             except Exception, e:
                 #sys.stderr.write(pformat(tweet)+'\n')
-                #sys.stderr.write(traceback.format_exc()+'\n')
-                sys.stderr.write(repr(e)+'\n')
+                sys.stderr.write(traceback.format_exc()+'\n')
+                sys.stderr.write('Rolling back in main for loop ... ')
+                db.session.rollback()
+                #sys.stderr.write(repr(e)+'\n')
 
 def get_lock():
     global lock_socket   # Without this our lock gets garbage collected
