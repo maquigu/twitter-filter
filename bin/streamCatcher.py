@@ -22,11 +22,13 @@ from app.models import (
     Mention,
     URL,
     Media,
-    db
+    db,
+    app
 )
 
 stream_timeout = 90 
 auth = OAuth(config.TWITTER_ACCESS_KEY, config.TWITTER_ACCESS_SECRET, config.TWITTER_CONSUMER_KEY, config.TWITTER_CONSUMER_SECRET)
+rollback_ctr = 0
 
 def _process_tweet(tweet_dict):
     user_obj = db.session.query(User).filter(User.tw_id==tweet_dict.get('user', {}).get('id_str', None)).first()
@@ -87,8 +89,16 @@ def insert(db_obj):
     try:
         db.session.add(db_obj)
         db.session.commit()
+        rollback_ctr = 0
     except:
-        db.session.rollback()
+        if rollback_ctr == 0:
+            db.session.rollback()
+            rollback_ctr += 1
+        else:
+            sys.stderr.write('rollback_ctr: '+rollback_ctr)
+            # reset db.session
+            db.close()
+            db.init_app(app)
         raise
 
 
