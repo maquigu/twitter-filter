@@ -70,7 +70,7 @@ def get_stream_metrics(ws):
         try:
             message = json.loads(ws.receive())
             log.info("Metrics Message: "+repr(message))
-            filters = message["filters"]
+            filters = message.get("filters", {})
             json_out = json.dumps({
                 "metrics": {
                     "total_tweets": query.stream_total(filters["stream_name"]), 
