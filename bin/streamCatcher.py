@@ -86,6 +86,7 @@ def _process_tweet(tweet_dict):
     insert(tweet_obj)
 
 def insert(db_obj):
+    global rollback_ctr
     try:
         db.session.add(db_obj)
         db.session.commit()
