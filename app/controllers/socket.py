@@ -45,12 +45,14 @@ def get_stream_tweets(ws):
             since_id = message.get("since_id", None)
             count = message.get("count", config.TWEETS_PER_PAGE)
             direction = message.get("direction", None)
+            reload = message.get("reload", None)
             tweets, max_id, since_id = query.filter_tweets(filters, max_id, since_id, count, direction)
             json_out = json.dumps({
                 "tweets":tweets, 
                 "max_id":max_id, 
                 "since_id":since_id,
-                "direction":direction, 
+                "direction":direction,
+                "reload": reload,
                 "status":"success"
             })
             #log.critical("Socket Out: "+repr(json_out))
