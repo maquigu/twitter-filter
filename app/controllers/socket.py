@@ -35,7 +35,10 @@ socket_mod = Blueprint("sockets", __name__, url_prefix="/sockets")
 def get_stream_tweets(ws):
     while not ws.closed:
         try:
-            message = json.loads(ws.receive())
+            payload = ws.receive()
+            if payload is None:
+                return
+            message = json.loads(payload)
             log.info("Tweets Message: "+repr(message))
             if "filters" in message:
                 filters = message["filters"]
@@ -48,6 +51,7 @@ def get_stream_tweets(ws):
             reload = message.get("reload", None)
             tweets, max_id, since_id = query.filter_tweets(filters, max_id, since_id, count, direction)
             json_out = json.dumps({
+                "filters": filters,
                 "tweets":tweets, 
                 "max_id":max_id, 
                 "since_id":since_id,
@@ -68,11 +72,15 @@ def get_stream_tweets(ws):
 def get_stream_metrics(ws):
     while not ws.closed:
         try:
-            message = json.loads(ws.receive())
+            payload = ws.receive()
+            if payload is None:
+                return
+            message = json.loads(payload)
             log.info("Metrics Message: "+repr(message))
             filters = message.get("filters", {})
             json_out = json.dumps({
                 "metrics": {
+                    "filters": filters,
                     "total_tweets": query.stream_total(filters.get("stream_name", None)), 
                     "top_users": query.user_metrics(filters),
                     "top_hashtags": query.hashtag_metrics(filters),

@@ -92,13 +92,13 @@ def insert(db_obj):
         db.session.commit()
         rollback_ctr = 0
     except:
-        sys.stderr.write('Exception rollback_ctr: ' + rollback_ctr)
+        sys.stderr.write('\nException rollback_ctr: ' + rollback_ctr)
         if rollback_ctr == 0:
-            sys,stderr.write('Rolling back ...')
+            sys.stderr.write('\nRolling back ...')
             db.session.rollback()
             rollback_ctr += 1
         else:
-            sys.stderr.write('Resetting db.session ...')
+            sys.stderr.write('\nResetting db.session ...')
             # reset db.session
             db.close()
             db.init_app(app)
