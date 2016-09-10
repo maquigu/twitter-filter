@@ -74,12 +74,14 @@ def get_stream_metrics(ws):
             if payload is None:
                 return
             message = json.loads(payload)
-            log.debug("Metrics Message: "+repr(message))
             filters = message.get("filters", {})
+            stream_name = filters.get("stream_name", None)
+            if stream_name is None:
+                return
             json_out = json.dumps({
                 "metrics": {
                     "filters": filters,
-                    "total_tweets": query.stream_total(filters.get("stream_name", None)), 
+                    "total_tweets": query.stream_total(stream_name), 
                     "top_users": query.user_metrics(filters),
                     "top_hashtags": query.hashtag_metrics(filters),
                     "top_lots": query.lot_metrics(filters),
