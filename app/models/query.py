@@ -147,9 +147,7 @@ def filter_tweets(filters, max_id, since_id, count, direction):
         join(StreamLot). \
         join(Stream)
     q = set_query_filters(q, **filters)
-    if direction == 'new': # Means we're going forward 
-        if since_id is None:
-            since_id = '0'
+    if direction == 'new' and since_id is not None: # Going forward in time
         q = q.filter(Tweet.tw_id > since_id)
     elif direction == 'old' and max_id is not None: # Means we're going backwards
         q = q.filter(Tweet.tw_id < max_id)
