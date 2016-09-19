@@ -71,7 +71,7 @@ def lot_metrics(filters):
         join(StreamLot). \
         join(Stream)
     q = set_query_filters(q, **filters)
-    q = q.group_by(User.screen_name).limit(config.TOP_N)
+    q = q.group_by(Lot.name).limit(config.TOP_N)
     for r in q.all():
         um = {
             "id": r[0],
