@@ -55,3 +55,6 @@ TWEETS_PER_PAGE = 20
 
 # Defaults for metrics
 TOP_N = 10
+
+# New content check interval
+CHECK_INTERVAL = 30 # secs.
