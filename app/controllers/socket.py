@@ -33,20 +33,20 @@ from app.models import query
 socket_mod = Blueprint("sockets", __name__, url_prefix="/sockets")
 
 def query_for_new_tweets(ws, filters, max_id, since_id, count, direction):
-    while not ws.closed:
+    #while not ws.closed:
         tweets, new_max_id, new_since_id = query.filter_tweets(filters, max_id, since_id, count, direction)
-        if new_since_id != 0 and new_max_id !=0:
+        if new_since_id is not None and new_max_id is not None:
             json_out = json.dumps({
                 "filters": filters,
                 "tweets":tweets, 
-                "max_id":max_id, 
-                "since_id":since_id,
+                "max_id":new_max_id, 
+                "since_id":new_since_id,
                 "direction":direction,
                 "status":"success"
             })
             ws.send(json_out)
             if direction == "new":                
-                max_id = since_id
+                since_id = new_max_id
         if direction == "new":  
             gevent.sleep(30)
         else:

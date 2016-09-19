@@ -1,4 +1,7 @@
 import os
+import logging
+import logging.handlers
+import config
 
 # Import flask and template operators
 from flask import render_template, send_from_directory, jsonify
@@ -8,6 +11,19 @@ from flask_bootstrap import Bootstrap
 from flask_sockets import Sockets
 # DB Models
 from app.models import app, db
+
+if config.DEBUG:
+    log_level = logging.DEBUG
+else:
+    log_level = logging.INFO
+
+log = logging.getLogger()
+fh = logging.handlers.RotatingFileHandler(config.LOGFILE, maxBytes=500000, backupCount=5)
+fh.setLevel(log_level)#no matter what level I set here
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#fh.setFormatter(formatter)
+log.addHandler(fh)
+log.setLevel(log_level)
 
 # Set app root
 app.root_path = os.path.abspath(os.path.dirname(__file__))
