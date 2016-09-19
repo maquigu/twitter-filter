@@ -1,10 +1,11 @@
 import simplejson as json
-import logging as log
 import sys
 from flask import Blueprint, request, jsonify
 import config
 from sqlalchemy import func
 import gevent
+
+from app import log
 
 # Import models
 from app.models import (
@@ -32,10 +33,10 @@ from app.models import query
 # Define the blueprint: "streams", set its url prefix: app.url/streams
 socket_mod = Blueprint("sockets", __name__, url_prefix="/sockets")
 
-def query_for_new_tweets(ws, filters, max_id, since_id, count, direction):
-    #while not ws.closed:
+def tweet_fetcher(ws, filters, max_id, since_id, count, direction, poll_new):
+    while not ws.closed:
         tweets, new_max_id, new_since_id = query.filter_tweets(filters, max_id, since_id, count, direction)
-        if new_since_id is not None and new_max_id is not None:
+        if new_since_id != 0 and new_max_id != 0:
             json_out = json.dumps({
                 "filters": filters,
                 "tweets":tweets, 
@@ -45,9 +46,9 @@ def query_for_new_tweets(ws, filters, max_id, since_id, count, direction):
                 "status":"success"
             })
             ws.send(json_out)
-            if direction == "new":                
+            if direction == "new":
                 since_id = new_max_id
-        if direction == "new":  
+        if direction == "new" and poll_new:  
             gevent.sleep(30)
         else:
             return
@@ -55,22 +56,31 @@ def query_for_new_tweets(ws, filters, max_id, since_id, count, direction):
 
 @socket_mod.route("/tweets")
 def get_stream_tweets(ws):
+    filters = {}
+    new_fetcher_running = False
     while not ws.closed:
         try:
             payload = ws.receive()
             if payload is None:
                 return
             message = json.loads(payload)
-            log.info("Tweets Message: "+repr(message))
+            log.debug("Tweets Message: "+repr(message))
             if "filters" in message:
                 filters = message["filters"]
-            else:
-                filters = {}
             max_id = message.get("max_id", None)
             since_id = message.get("since_id", None)
             count = message.get("count", config.TWEETS_PER_PAGE)
             direction = message.get("direction", None)
-            query_for_new_tweets(ws, filters, max_id, since_id, count, direction)
+            if new_fetcher_running or direction != "new":
+                poll_new = False
+                tweet_fetcher(ws, filters, max_id, since_id, count, direction, poll_new)
+            else:
+                poll_new = False
+                threads = [gevent.spawn(tweet_fetcher, ws, filters, max_id, since_id, count, direction, poll_new)]
+                gevent.joinall(threads)
+                log.debug("Polling for new tweets ...")
+            if poll_new:
+                new_fetcher_running = True
         except Exception, e:
             log.exception("WS Error in tweets: "+repr(e))
             json_out = json.dumps({
