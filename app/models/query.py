@@ -22,6 +22,8 @@ from app.models import (
     db
 )
 
+from app import log
+
 # set_query_filters sets the query filters based on above 
 def set_query_filters(q, stream_name=None, users=[], lots=[], hashtags=[], urls=[], start=[], end=[]):
     if stream_name:
@@ -43,15 +45,15 @@ def set_query_filters(q, stream_name=None, users=[], lots=[], hashtags=[], urls=
 
 def user_metrics(filters):
     metrics = []
-    q = db.session.query(User._id, User.screen_name, func.count(Tweet.tw_id)). \
+    q = db.session.query(User._id, User.screen_name, func.count(Tweet.tw_id).label('tweet_count')). \
         join(Tweet). \
         join(LotUser). \
         join(Lot). \
         join(StreamLot). \
         join(Stream)
     q = set_query_filters(q, **filters)
-    q = q.group_by(User.screen_name).limit(config.TOP_N)
-    #sys.stderr.write("QUERY: %s\n" % str(q))
+    q = q.group_by(User.screen_name).order_by('tweet_count DESC').limit(config.TOP_N)
+    #log.debug("QUERY: %s\n" % str(q))
     for r in q.all():
         #sys.stderr.write("ROW: %s\n" % repr(r))
         um = {
@@ -64,14 +66,14 @@ def user_metrics(filters):
 
 def lot_metrics(filters):
     metrics = []
-    q = db.session.query(Lot._id, Lot.name, func.count(Tweet.tw_id)). \
+    q = db.session.query(Lot._id, Lot.name, func.count(Tweet.tw_id).label('tweet_count')). \
         join(LotUser). \
         join(User). \
         join(Tweet). \
         join(StreamLot). \
         join(Stream)
     q = set_query_filters(q, **filters)
-    q = q.group_by(Lot.name).limit(config.TOP_N)
+    q = q.group_by(Lot.name).order_by('tweet_count DESC').limit(config.TOP_N)
     for r in q.all():
         um = {
             "id": r[0],
@@ -83,7 +85,7 @@ def lot_metrics(filters):
 
 def hashtag_metrics(filters):
     metrics = []
-    q = db.session.query(Hashtag._id, Hashtag.text, func.count(Tweet.tw_id)). \
+    q = db.session.query(Hashtag._id, Hashtag.text, func.count(Tweet.tw_id).label('tweet_count')). \
         join(TweetHashtag). \
         join(Tweet). \
         join(User). \
@@ -92,7 +94,7 @@ def hashtag_metrics(filters):
         join(StreamLot). \
         join(Stream)
     q = set_query_filters(q, **filters)
-    q = q.group_by(Hashtag.text).limit(config.TOP_N)
+    q = q.group_by(Hashtag.text).order_by('tweet_count DESC').limit(config.TOP_N)
     #sys.stderr.write("QUERY: %s\n" % str(q))
     for r in q.all():
         #sys.stderr.write("ROW: %s\n" % repr(r))
@@ -106,7 +108,7 @@ def hashtag_metrics(filters):
 
 def url_metrics(filters):
     metrics = []
-    q = db.session.query(URL._id, URL.expanded_url, func.count(Tweet.tw_id)). \
+    q = db.session.query(URL._id, URL.expanded_url, func.count(Tweet.tw_id).label('tweet_count')). \
         join(TweetURL). \
         join(Tweet). \
         join(User). \
@@ -115,7 +117,7 @@ def url_metrics(filters):
         join(StreamLot). \
         join(Stream)
     q = set_query_filters(q, **filters)
-    q = q.group_by(URL.expanded_url).limit(config.TOP_N)
+    q = q.group_by(URL.expanded_url).order_by('tweet_count DESC').limit(config.TOP_N)
     for r in q.all():
         m = {
             "id": r[0],
