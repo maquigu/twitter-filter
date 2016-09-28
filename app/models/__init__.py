@@ -1,10 +1,12 @@
+import logging
+import logging.handlers
 from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext import hybrid
 from sqlalchemy.orm import column_property, relationship, backref
 from sqlalchemy import func
 from sqlalchemy import (
-    Column,
+    #Column,
     Boolean,
     String,
     Integer,
@@ -34,11 +36,26 @@ def init_app_db(config_mod):
     db.init_app(app)
     return app, db
 
+if config.DEBUG:
+    log_level = logging.DEBUG
+else:
+    log_level = logging.INFO
+
+log = logging.getLogger()
+fh = logging.handlers.RotatingFileHandler(config.LOGFILE, maxBytes=500000, backupCount=5)
+#no matter what level I set here
+fh.setLevel(log_level)
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#fh.setFormatter(formatter)
+log.addHandler(fh)
+log.setLevel(log_level)
+
 app, db = init_app_db(config.FLASK_CONFIG_MODULE)
 
 # Close DB session
 @app.teardown_appcontext
 def shutdown_session(exception=None):
+    log.info('Tearing down DB session ... ')
     db.session.close()
     db.session.remove()
 
