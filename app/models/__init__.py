@@ -22,6 +22,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 # App config
 import config
 
+# Init DB
 def init_app_db(config_mod):
     # Define the WSGI application object
     app = Flask(__name__)
@@ -34,6 +35,12 @@ def init_app_db(config_mod):
     return app, db
 
 app, db = init_app_db(config.FLASK_CONFIG_MODULE)
+
+# Close DB session
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.close()
+    db.session.remove()
 
 class CommonColumns(db.Model):
     __abstract__ = True

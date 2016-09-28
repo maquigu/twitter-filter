@@ -1,5 +1,6 @@
 import config
 from sqlalchemy import func
+from sqlalchemy import distinct
 import simplejson as json
 
 # Import models
@@ -35,7 +36,6 @@ def set_query_filters(q, stream_name=None, users=[], lots=[], hashtags=[], urls=
     if hashtags:
         q = q.filter(Hashtag._id.in_(hashtags))
     if urls:
-        q = q.join(TweetURL).join(URL)
         q = q.filter(URL._id.in_(urls))
     if start:
         q = q.filter(Tweet.created_at >= start_timestamp)
@@ -66,7 +66,7 @@ def user_metrics(filters):
 
 def lot_metrics(filters):
     metrics = []
-    q = db.session.query(Lot._id, Lot.name, func.count(Tweet.tw_id).label('tweet_count')). \
+    q = db.session.query(Lot._id, Lot.name, func.count(distinct(User._id)), func.count(Tweet.tw_id).label('tweet_count')). \
         join(LotUser). \
         join(User). \
         join(Tweet). \
@@ -78,7 +78,8 @@ def lot_metrics(filters):
         um = {
             "id": r[0],
             "name": r[1],
-            "tweets": r[2]
+            "members": r[2],
+            "tweets": r[3]
         }
         metrics.append(um)
     return metrics
@@ -129,14 +130,14 @@ def url_metrics(filters):
 
 
 def stream_total(stream_name):
-    q = db.session.query(Tweet).\
+    q = db.session.query(func.min(Tweet.created_at), func.max(Tweet.created_at), func.count(Tweet.tw_id).label('tweet_count')).\
         join(User). \
         join(LotUser). \
         join(Lot). \
         join(StreamLot). \
         join(Stream)
     q = set_query_filters(q, stream_name=stream_name)
-    return q.count()
+    return q.one()
 
 def filter_tweets(filters, max_id, since_id, count, direction):
     tweets = []
