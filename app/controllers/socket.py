@@ -35,8 +35,10 @@ socket_mod = Blueprint("sockets", __name__, url_prefix="/sockets")
 
 def tweet_fetcher(ws, filters, max_id, since_id, count, direction, poll_new):
     while not ws.closed:
+        log.debug( 'Fetching tweets ...')
         tweets, new_max_id, new_since_id = query.filter_tweets(filters, max_id, since_id, count, direction)
         if new_since_id != 0 and new_max_id != 0:
+            log.debug( 'Pushing '+str(len(tweets))+' new tweets')
             json_out = json.dumps({
                 "filters": filters,
                 "tweets":tweets, 
@@ -56,6 +58,7 @@ def tweet_fetcher(ws, filters, max_id, since_id, count, direction, poll_new):
 
 @socket_mod.route("/tweets")
 def get_stream_tweets(ws):
+    poll_new = False
     filters = {}
     new_fetcher_running = False
     while not ws.closed:
@@ -75,10 +78,10 @@ def get_stream_tweets(ws):
                 poll_new = False
                 tweet_fetcher(ws, filters, max_id, since_id, count, direction, poll_new)
             else:
-                poll_new = False
+                log.debug("Polling for new tweets ...")
+                poll_new = True
                 threads = [gevent.spawn(tweet_fetcher, ws, filters, max_id, since_id, count, direction, poll_new)]
                 gevent.joinall(threads)
-                log.debug("Polling for new tweets ...")
             if poll_new:
                 new_fetcher_running = True
         except Exception, e:
