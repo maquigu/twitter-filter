@@ -9,7 +9,7 @@ fi
 
 start(){
     # For buffer interaction with Twitter API
-    celery -A app.celery.buffer_tasks.celery worker -Q twitter_buffer --loglevel=debug -n twitter_buffer &
+    #celery -A app.celery.buffer_tasks.celery worker -Q twitter_buffer --loglevel=debug -n twitter_buffer &
     # Twitter Streaming API
     # celery -A app.celery.catcher_tasks.celery worker -Q twitter_catcher --loglevel=debug -n twitter_catcher -c 3 &
     # Start Flask app
